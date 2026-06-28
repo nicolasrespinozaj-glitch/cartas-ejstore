@@ -255,7 +255,20 @@ function tocaHoy(llegada){
   return mismodia(new Date(llegada),target);
 }
 
-function fechaMaxRetiro(llegada){const d=new Date(llegada);d.setDate(d.getDate()+7);return d;}
+function fechaMaxRetiro(){
+  // La fecha máxima depende del día en que se ENVÍA la carta (hoy)
+  const h=hoy();
+  const dia=h.getDay(); // 0=dom,1=lun,...,6=sab
+  const max=new Date(h);
+  if(dia===6){
+    // Sábado → máximo el lunes (sumamos 2 días)
+    max.setDate(h.getDate()+2);
+  } else {
+    // Lunes a viernes → máximo el día siguiente
+    max.setDate(h.getDate()+1);
+  }
+  return max;
+}
 
 // Plantilla B = llegó martes (carta sale sábado con horario especial)
 function esPlantillaB(llegada){return new Date(llegada).getDay()===2;}
@@ -444,7 +457,7 @@ function mostrarResultados(sc,target){
   <table><thead><tr><th>#</th><th>Cliente</th><th>Producto</th><th>Ciudad</th><th>Horario hoy</th><th>Fecha máx.</th><th>Tipo</th><th>Acción</th></tr></thead><tbody>`;
 
   pedidos.forEach((p,i)=>{
-    const fmax=fechaMaxRetiro(p.llegada);
+    const fmax=fechaMaxRetiro();
     const tipo=p.esB?'<span class="tag tb">B</span>':'<span class="tag ta">A</span>';
     const hor=p.horario?p.horario.replace(/H/g,'h'):'<span class="tag tw">No encontrado</span>';
     const ext=(p.sinCruce?' <span class="tag tw">Sin tel.</span>':'')+(!p.guia?' <span class="tag tw">Sin guía</span>':'');
@@ -465,7 +478,7 @@ function mostrarResultados(sc,target){
 
 // ── Generar mensaje ──────────────────────────────────────────────
 function genMsg(p){
-  const fmax=fmtLarga(fechaMaxRetiro(p.llegada));
+  const fmax=fmtLarga(fechaMaxRetiro());
   const hor=p.horario?p.horario.replace(/H/g,'h'):null;
   const h=hoy();
   const guia=p.guia||'(número de guía pendiente)';
